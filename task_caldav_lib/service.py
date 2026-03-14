@@ -344,23 +344,19 @@ class CalDAVService:
         return completed
 
     def _spawn_next_recurrence(self, task: dict, completed_at: datetime):
-        """Create the next occurrence of a recurring task after completion."""
+        """Create the next occurrence of a recurring task after completion.
+
+        The next due date is always N intervals from the completion date,
+        not the next occurrence in a fixed schedule.
+        """
         from dateutil.rrule import rrulestr
 
         rrule_str = task['recurrence']
         due_str = task.get('due')
 
-        if due_str:
-            dtstart = parse_dt(due_str)
-            if dtstart.tzinfo is None:
-                dtstart = dtstart.replace(tzinfo=timezone.utc)
-        else:
-            dtstart = completed_at
-
         try:
-            rule = rrulestr(rrule_str, dtstart=dtstart, ignoretz=False)
-            after = max(dtstart, completed_at)
-            next_dt = rule.after(after, inc=False)
+            rule = rrulestr(rrule_str, dtstart=completed_at, ignoretz=False)
+            next_dt = rule.after(completed_at, inc=False)
         except Exception as e:
             print(f"Warning: could not compute next recurrence from '{rrule_str}': {e}")
             next_dt = None

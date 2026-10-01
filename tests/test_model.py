@@ -122,3 +122,8 @@ def test_rejects_unknown_fields():
     _, c = _todo()
     with pytest.raises(ValueError):
         apply_patch(c, {'uid': 'nope'}, LA)
+
+
+def test_empty_categories_line_gives_no_tags():
+    _, c = _todo(SAMPLE.replace('CATEGORIES:Home,Chores', 'CATEGORIES:'))
+    assert parse_vtodo(c, LA).tags == []

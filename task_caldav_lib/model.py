@@ -117,10 +117,10 @@ def _parse_categories(c: Component) -> list[str]:
     tags: list[str] = []
     for prop in _as_list(c.get('CATEGORIES')):
         if hasattr(prop, 'cats'):
-            tags.extend(str(x) for x in prop.cats)
+            tags.extend(str(x).strip() for x in prop.cats)
         else:
-            tags.extend(x.strip() for x in str(prop).split(',') if x.strip())
-    return tags
+            tags.extend(x.strip() for x in str(prop).split(','))
+    return [t for t in tags if t]  # iOS sometimes writes an empty 'CATEGORIES:'
 
 
 def _parse_parent(c: Component) -> Optional[str]:
